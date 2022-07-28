@@ -13,8 +13,8 @@ import (
 func RegisterHandlers(mux *http.ServeMux, service Service) {
 	res := resource{service}
 
-	mux.HandleFunc("/image-of-day", res.get)
-	mux.HandleFunc("/images", res.query)
+	mux.HandleFunc("/image-of-the-day", res.get)
+	mux.HandleFunc("/images", res.list)
 }
 
 type resource struct {
@@ -48,7 +48,7 @@ func (r resource) get(rw http.ResponseWriter, req *http.Request) {
 	replyJson(rw, img)
 }
 
-func (r resource) query(rw http.ResponseWriter, req *http.Request) {
+func (r resource) list(rw http.ResponseWriter, req *http.Request) {
 	images, err := r.service.List(req.Context())
 	if err != nil {
 		replyError(rw, http.StatusInternalServerError, "error occured while retreiving the images")

@@ -3,13 +3,15 @@ package image
 import (
 	"apod-img-store/internal/entity"
 	"context"
+	"database/sql"
 	"time"
 )
 
-// Service encapsulates logic for albums.
+// Service encapsulates logic for images.
 type Service interface {
 	GetByDate(ctx context.Context, date time.Time) (*Image, error)
 	List(ctx context.Context) ([]Image, error)
+	CreateIfNotExist(ctx context.Context, date time.Time, image Image) error
 }
 
 // Image represents the data about an image.
@@ -49,4 +51,19 @@ func (s *service) List(ctx context.Context) ([]Image, error) {
 	}
 
 	return result, nil
+}
+
+// List returns the images.
+func (s *service) CreateIfNotExist(ctx context.Context, date time.Time, image Image) error {
+	_, err := s.repo.GetByDate(ctx, date)
+	if err != sql.ErrNoRows {
+		return nil
+	}
+
+	err = s.repo.Create(ctx, image.Image)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

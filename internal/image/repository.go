@@ -13,6 +13,7 @@ import (
 type Repository interface {
 	GetByDate(ctx context.Context, date time.Time) (*entity.Image, error)
 	List(ctx context.Context) ([]entity.Image, error)
+	Create(ctx context.Context, image entity.Image) error
 }
 
 // repository persists images in database
@@ -78,4 +79,15 @@ func (r repository) List(ctx context.Context) ([]entity.Image, error) {
 	}
 
 	return images, nil
+}
+
+func (r repository) Create(ctx context.Context, image entity.Image) error {
+	sqlStatement := `
+	INSERT INTO image (id, title, copyright, url, created_at)
+	VALUES ($1, $2, $3, $4, $5)`
+
+	_, err := r.db.ExecContext(ctx, sqlStatement,
+		entity.GenerateID(), image.Title, image.Copyright, image.Url, image.CreatedAt)
+
+	return err
 }

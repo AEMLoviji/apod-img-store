@@ -4,6 +4,7 @@ import (
 	"apod-img-store/api"
 	"apod-img-store/config"
 	"apod-img-store/database"
+	"apod-img-store/internal/image"
 	"apod-img-store/job"
 	"log"
 )
@@ -16,7 +17,9 @@ func main() {
 
 	database.Initialize(config.DBDriver, config.DBSource)
 
-	go job.RunApodImageRetreiverCronJob()
+	imageService := image.NewService(image.NewRepository(database.DB))
+	job := job.NewApodJob(imageService)
+	go job.Run()
 
 	server := api.NewServer(config.ServerPort)
 	server.Start()
