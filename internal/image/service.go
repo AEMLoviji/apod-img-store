@@ -11,7 +11,7 @@ import (
 type Service interface {
 	GetByDate(ctx context.Context, date time.Time) (*Image, error)
 	List(ctx context.Context) ([]Image, error)
-	CreateIfNotExist(ctx context.Context, date time.Time, image Image) error
+	CreateIfNotExist(ctx context.Context, image Image) error
 }
 
 // Image represents the data about an image.
@@ -54,8 +54,8 @@ func (s *service) List(ctx context.Context) ([]Image, error) {
 }
 
 // List returns the images.
-func (s *service) CreateIfNotExist(ctx context.Context, date time.Time, image Image) error {
-	_, err := s.repo.GetByDate(ctx, date)
+func (s *service) CreateIfNotExist(ctx context.Context, image Image) error {
+	_, err := s.repo.GetByDate(ctx, image.CreatedAt)
 	if err != sql.ErrNoRows {
 		return nil
 	}

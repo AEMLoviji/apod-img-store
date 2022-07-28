@@ -32,16 +32,18 @@ func (r repository) GetByDate(ctx context.Context, date time.Time) (*entity.Imag
 	var title string
 	var copyright string
 	var url string
+	var createdAt time.Time
 
-	row := r.db.QueryRow(`SELECT id, title, copyright, url FROM image WHERE created_at=$1;`, date)
+	row := r.db.QueryRow(`SELECT id, title, copyright, url, created_at FROM image WHERE created_at=$1;`, date)
 
-	switch err := row.Scan(&id, &title, &copyright, &url); err {
+	switch err := row.Scan(&id, &title, &copyright, &url, &createdAt); err {
 	case nil:
 		return &entity.Image{
 			ID:        id,
 			Title:     title,
 			Copyright: copyright,
 			Url:       url,
+			CreatedAt: createdAt,
 		}, nil
 	case sql.ErrNoRows:
 		return nil, sql.ErrNoRows
@@ -52,7 +54,7 @@ func (r repository) GetByDate(ctx context.Context, date time.Time) (*entity.Imag
 
 // Query retrieves the image records from the database.
 func (r repository) List(ctx context.Context) ([]entity.Image, error) {
-	rows, err := database.DB.Query(`SELECT id, title, copyright, url FROM image`)
+	rows, err := database.DB.Query(`SELECT id, title, copyright, url, created_at FROM image`)
 	if err != nil {
 		return nil, err
 	}
@@ -61,10 +63,11 @@ func (r repository) List(ctx context.Context) ([]entity.Image, error) {
 	var title string
 	var copyright string
 	var url string
+	var createdAt time.Time
 
 	var images []entity.Image
 	for rows.Next() {
-		if err = rows.Scan(&id, &title, &copyright, &url); err != nil {
+		if err = rows.Scan(&id, &title, &copyright, &url, &createdAt); err != nil {
 			return nil, err
 		}
 
@@ -73,6 +76,7 @@ func (r repository) List(ctx context.Context) ([]entity.Image, error) {
 			Title:     title,
 			Copyright: copyright,
 			Url:       url,
+			CreatedAt: createdAt,
 		}
 
 		images = append(images, img)

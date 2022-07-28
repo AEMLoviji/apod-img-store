@@ -13,7 +13,7 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-E
 	        title VARCHAR,
 	        copyright VARCHAR,
           url VARCHAR NOT NULL,
-	        created_at TIMESTAMP NOT NULL
+	        created_at DATE NOT NULL
 	      );
   COMMIT;
 
