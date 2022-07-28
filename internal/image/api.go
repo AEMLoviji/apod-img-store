@@ -1,6 +1,7 @@
 package image
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -12,8 +13,8 @@ import (
 func RegisterHandlers(mux *http.ServeMux, service Service) {
 	res := resource{service}
 
-	mux.HandleFunc("/proxy", res.get)
-	mux.HandleFunc("/proxy/history", res.query)
+	mux.HandleFunc("/image-of-day", res.get)
+	mux.HandleFunc("/images", res.query)
 }
 
 type resource struct {
@@ -35,7 +36,12 @@ func (r resource) get(rw http.ResponseWriter, req *http.Request) {
 
 	img, err := r.service.GetByDate(req.Context(), date)
 	if err != nil {
-		replyError(rw, http.StatusInternalServerError, "error occured while retreiving the image")
+		switch err {
+		case sql.ErrNoRows:
+			replyError(rw, http.StatusNotFound, "image for the given date not found")
+		default:
+			replyError(rw, http.StatusInternalServerError, "error occured while retreiving the image")
+		}
 		return
 	}
 

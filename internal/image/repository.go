@@ -32,11 +32,9 @@ func (r repository) GetByDate(ctx context.Context, date time.Time) (*entity.Imag
 	var copyright string
 	var url string
 
-	row := r.db.QueryRow(`SELECT id, title, copyright, url FROM image WHERE created_at=$1;`, 3)
+	row := r.db.QueryRow(`SELECT id, title, copyright, url FROM image WHERE created_at=$1;`, date)
 
 	switch err := row.Scan(&id, &title, &copyright, &url); err {
-	case sql.ErrNoRows:
-		return nil, errors.New("No image found")
 	case nil:
 		return &entity.Image{
 			ID:        id,
@@ -44,6 +42,8 @@ func (r repository) GetByDate(ctx context.Context, date time.Time) (*entity.Imag
 			Copyright: copyright,
 			Url:       url,
 		}, nil
+	case sql.ErrNoRows:
+		return nil, sql.ErrNoRows
 	default:
 		return nil, errors.New("Error occurred image found")
 	}
